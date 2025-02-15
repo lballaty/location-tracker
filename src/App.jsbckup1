@@ -1,0 +1,49 @@
+import React, { useState, useEffect } from 'react';
+
+function App() {
+  const [location, setLocation] = useState(null); // Store the location
+  const [tracking, setTracking] = useState(false); // Track if location tracking is active
+
+  // useEffect to handle location tracking
+  useEffect(() => {
+    let watchId; // Variable to store the watchPosition ID
+
+    if (tracking) {
+      // Start tracking location
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude }); // Update location state
+          console.log('Location:', latitude, longitude); // Log to console
+        },
+        (error) => {
+          console.error('Error fetching location:', error); // Handle errors
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } // Options
+      );
+    }
+
+    // Cleanup function to stop tracking when component unmounts or tracking stops
+    return () => {
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId); // Stop tracking
+      }
+    };
+  }, [tracking]); // Run this effect whenever `tracking` changes
+
+  return (
+    <div>
+      <h1>Location Tracker</h1>
+      <button onClick={() => setTracking(!tracking)}>
+        {tracking ? 'Stop Tracking' : 'Start Tracking'}
+      </button>
+      {location && (
+        <p>
+          Latitude: {location.latitude}, Longitude: {location.longitude}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default App;
